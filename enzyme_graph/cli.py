@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 
 from .benchmark import run_benchmark
+from .comparison import run_comparison
 from .data import describe, load_split, read_graphs
 from .models import ARCHITECTURES
 from .training import device_for, evaluate, test_model, train
@@ -48,6 +49,10 @@ def main() -> None:
     training_options(benchmark)
     benchmark.add_argument("--output", type=Path, default=Path("runs/benchmark"))
 
+    comparison = with_split(commands.add_parser("compare-mpnn"))
+    training_options(comparison)
+    comparison.add_argument("--output", type=Path, default=Path("runs/compare-mpnn"))
+
     args = parser.parse_args()
     if args.threads < 1 or args.batch_size < 1:
         parser.error("--threads and --batch-size must be positive")
@@ -88,7 +93,8 @@ def run(args: argparse.Namespace) -> None:
         scores, _, _ = evaluate(split["test"], args.checkpoint, device, args.batch_size)
         print(json.dumps(scores, indent=2))
     else:
-        result = run_benchmark(
+        compare = run_comparison if args.command == "compare-mpnn" else run_benchmark
+        result = compare(
             split, args.output, epochs=args.epochs, patience=args.patience, batch_size=args.batch_size, device=device,
         )
         print(f"Validation winner: {result['winner']}. Results saved to {args.output}")

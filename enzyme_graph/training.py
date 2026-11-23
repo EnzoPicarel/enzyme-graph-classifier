@@ -9,11 +9,11 @@ from pathlib import Path
 
 import numpy as np
 import torch
-from torch.nn import functional as F
+from torch import nn
 from torch.utils.data import DataLoader
 
 from .data import CLASS_COUNT, Graph, collate, fit_scaler, prepare, read_graphs
-from .models import GraphClassifier
+from .models import MESSAGE_PASSING, make_model
 
 
 def device_for(name: str) -> torch.device:
@@ -47,7 +47,7 @@ def metrics(labels: np.ndarray, predictions: np.ndarray) -> dict:
 
 
 @torch.inference_mode()
-def infer(model: GraphClassifier, batches: DataLoader, device: torch.device) -> tuple[np.ndarray, np.ndarray]:
+def infer(model: nn.Module, batches: DataLoader, device: torch.device) -> tuple[np.ndarray, np.ndarray]:
     model.eval()
     probabilities = []
     labels = []
@@ -75,8 +75,13 @@ def train(
     scaler = fit_scaler(graphs)
     batches = loader(graphs, scaler, batch_size, seed)
     validation_batches = loader(validation, scaler, batch_size) if validation else None
-    model = GraphClassifier(architecture).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    model = make_model(architecture).to(device)
+    residual = architecture in MESSAGE_PASSING
+    if residual:
+        optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    else:
+        optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    objective = nn.CrossEntropyLoss(label_smoothing=0.05 if residual else 0.0)
     state = None
     best_f1 = -1.0
     best_epoch = 0
@@ -88,8 +93,10 @@ def train(
         for features, adjacency, mask, labels in batches:
             optimizer.zero_grad(set_to_none=True)
             logits = model(features.to(device), adjacency.to(device), mask.to(device))
-            loss = F.cross_entropy(logits, labels.to(device))
+            loss = objective(logits, labels.to(device))
             loss.backward()
+            if residual:
+                nn.utils.clip_grad_norm_(model.parameters(), 5)
             optimizer.step()
             loss_sum += loss.detach() * len(labels)
         epoch_loss = float(loss_sum / len(graphs))
@@ -129,9 +136,9 @@ def train(
     return result
 
 
-def load_model(checkpoint: Path, device: torch.device) -> tuple[GraphClassifier, tuple]:
+def load_model(checkpoint: Path, device: torch.device) -> tuple[nn.Module, tuple]:
     saved = torch.load(checkpoint, map_location="cpu", weights_only=True)
-    model = GraphClassifier(saved["architecture"]).to(device)
+    model = make_model(saved["architecture"]).to(device)
     model.load_state_dict(saved["state"])
     return model, saved["scaler"]
 

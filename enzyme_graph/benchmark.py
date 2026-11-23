@@ -6,7 +6,7 @@ import matplotlib
 import numpy as np
 
 from .data import CLASS_COUNT, Graph
-from .models import ARCHITECTURES
+from .models import BASELINES
 from .training import evaluate, metrics, train, write_json
 
 matplotlib.use("Agg")
@@ -75,7 +75,7 @@ def run_benchmark(split: dict[str, list[Graph]], directory: Path, *, epochs: int
         return result
 
     models = {}
-    for architecture in ARCHITECTURES:
+    for architecture in BASELINES:
         trials = [run(architecture, lr, SEEDS[0]) for lr in LEARNING_RATES]
         primary = max(trials, key=lambda trial: trial["validation_f1"])
         selected = [primary] + [run(architecture, primary["lr"], seed) for seed in SEEDS[1:]]

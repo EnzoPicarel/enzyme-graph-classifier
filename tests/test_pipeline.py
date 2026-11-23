@@ -9,9 +9,13 @@ from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
+import torch
 
 from enzyme_graph.benchmark import roc_curve
 from enzyme_graph.cli import main
+from enzyme_graph.comparison import development_folds
+from enzyme_graph.data import read_graphs
+from enzyme_graph.models import MESSAGE_PASSING, make_model
 
 
 def write_fixture(directory: Path) -> None:
@@ -73,6 +77,36 @@ class PipelineTest(unittest.TestCase):
                 rows = list(reader)
             self.assertEqual([row["graph_id"] for row in rows], [f"{label}-8" for label in range(6, 0, -1)])
             self.assertTrue(all(1 <= int(row["label"]) <= 6 for row in rows))
+
+    def test_residual_models_ignore_padding_and_node_order(self):
+        torch.manual_seed(7)
+        features = torch.randn(1, 3, 21)
+        adjacency = torch.tensor([[[0., 1., 0.], [1., 0., 1.], [0., 1., 0.]]])
+        mask = torch.ones(1, 3, dtype=torch.bool)
+        order = torch.tensor([2, 0, 1])
+        padded_features = torch.zeros(1, 5, 21)
+        padded_features[:, :3] = features[:, order]
+        padded_adjacency = torch.zeros(1, 5, 5)
+        padded_adjacency[:, :3, :3] = adjacency[:, order][:, :, order]
+        padded_mask = torch.tensor([[True, True, True, False, False]])
+        with torch.inference_mode():
+            for architecture in MESSAGE_PASSING:
+                with self.subTest(architecture=architecture):
+                    model = make_model(architecture).eval()
+                    actual = model(padded_features, padded_adjacency, padded_mask)
+                    torch.testing.assert_close(actual, model(features, adjacency, mask))
+
+    def test_development_folds_partition_the_labeled_graphs(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            write_fixture(root)
+            graphs = read_graphs(root / "train.csv", labeled=True)
+            folds = development_folds(graphs)
+            self.assertEqual(len(folds), 5)
+            self.assertCountEqual([graph.graph_id for fold in folds for graph in fold],
+                                  [graph.graph_id for graph in graphs])
+            for fold in folds:
+                self.assertEqual({graph.label for graph in fold}, set(range(6)))
 
     def test_roc_treats_probability_ties_as_one_threshold(self):
         labels = np.array([True, False, True, False])
