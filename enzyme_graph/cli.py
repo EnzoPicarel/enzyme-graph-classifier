@@ -3,6 +3,7 @@
 import argparse
 import json
 from pathlib import Path
+from zipfile import BadZipFile
 
 import torch
 
@@ -11,6 +12,7 @@ from .comparison import run_comparison
 from .data import describe, load_split, read_graphs
 from .models import ARCHITECTURES
 from .training import device_for, evaluate, test_model, train
+from .tu_data import convert_tu
 
 
 def main() -> None:
@@ -21,6 +23,10 @@ def main() -> None:
     parser.add_argument("--threads", type=int, default=2)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("inspect")
+
+    prepare_tu = commands.add_parser("prepare-tu", help="Convert the public ENZYMES ZIP to CSV")
+    prepare_tu.add_argument("--archive", type=Path, required=True)
+    prepare_tu.add_argument("--output", type=Path, default=Path("data/tu/train.csv"))
 
     def with_split(command):
         command.add_argument("--split", type=Path, default=Path("runs/split.json"))
@@ -60,16 +66,21 @@ def main() -> None:
 
     try:
         run(args)
-    except (ValueError, OSError, KeyError) as error:
+    except (ValueError, OSError, KeyError, BadZipFile) as error:
         parser.exit(1, f"error: {error}\n")
 
 
 def run(args: argparse.Namespace) -> None:
+    if args.command == "prepare-tu":
+        count = convert_tu(args.archive, args.output)
+        print(f"Wrote {count} labeled graphs to {args.output}")
+        return
     if args.command == "inspect":
-        print(json.dumps({
-            "labeled": describe(read_graphs(args.data / "train.csv", labeled=True)),
-            "unlabeled": describe(read_graphs(args.data / "test.csv", labeled=False)),
-        }, indent=2))
+        profile = {"labeled": describe(read_graphs(args.data / "train.csv", labeled=True))}
+        test_csv = args.data / "test.csv"
+        if test_csv.exists():
+            profile["unlabeled"] = describe(read_graphs(test_csv, labeled=False))
+        print(json.dumps(profile, indent=2))
         return
 
     device = device_for(args.device)

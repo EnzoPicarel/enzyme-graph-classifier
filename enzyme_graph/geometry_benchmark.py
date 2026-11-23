@@ -323,12 +323,17 @@ def run(
                     flush=True,
                 )
     probabilities = (base.mean(axis=0) + adaptive.mean(axis=0)) * 0.5
+    training_counts = sorted(
+        {len(train) for repeat, _, train, _ in partitions if repeat != -1}
+    )
     result = {
         "outer_folds": OUTER_FOLDS,
         "outer_seeds": list(OUTER_SEEDS),
         "inner_folds": INNER_FOLDS,
         "graphs_evaluated": len(graphs),
-        "train_graphs_per_outer_fold": len(graphs) - len(partitions[1][3]),
+        "train_graphs_per_outer_fold": training_counts[0]
+        if len(training_counts) == 1
+        else training_counts,
         "data_sha256": fingerprint,
         "out_of_fold": metrics(labels, probabilities.argmax(axis=1)),
         "base_out_of_fold": metrics(labels, base.mean(axis=0).argmax(axis=1)),
