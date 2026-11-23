@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/ROCm-WSL-ED1C24?logo=amd&logoColor=white" alt="ROCm on WSL">
 </p>
 
-<p align="center"><a href="#quick-start">Quick Start</a> · <a href="#residual-message-passing-results">Results</a> · <a href="#tests">Tests</a></p>
+<p align="center"><a href="#quick-start">Quick Start</a> · <a href="#graph-similarity-benchmark">Results</a> · <a href="#tests">Tests</a></p>
 
 This benchmark compares a one-layer GCN, a two-layer GCN, a two-layer Graph Isomorphism Network (GIN), and residual message-passing networks on ENZYMES. The pipeline covers graph validation, seeded experiments, checkpoint-based inference, and per-class evaluation.
 
@@ -113,6 +113,25 @@ The 3-layer sum MPNN gained 0.143 held-out macro-F1 over the matched GIN refit. 
 </p>
 
 [Residual model fold and refit metrics](docs/results/mpnn-comparison.json)
+
+## Graph similarity benchmark
+
+This benchmark compares graphs using node-attribute matches, approximate transport distances, and agreement between adjacent nodes. It combines a graph-similarity classifier with a variant that scales distances by local neighborhood density. Each combines class-level distance summaries, kernel SVM scores, and local logistic scores.
+
+| Model | Out-of-fold macro-F1 | Out-of-fold accuracy |
+| --- | ---: | ---: |
+| Base similarity classifier | 0.79588 | 79.58% |
+| Density-adapted classifier | 0.80575 | 80.63% |
+| Equal-weight ensemble | **0.81218** | **81.25%** |
+
+The evaluation uses two stratified 16-fold repeats. Each outer prediction uses 450 labeled training graphs, and the score combines all 480 out-of-fold predictions after averaging each graph's probabilities across repeats. The eight-fold calibration step runs within each outer training fold. On the original 60-graph holdout, the same ensemble trained on 420 graphs scored **0.73963 macro-F1**.
+
+```bash
+python -m pip install '.[geometry]'
+HSA_ENABLE_DXG_DETECTION=1 python -m enzyme_graph.geometry_benchmark --device cuda
+```
+
+Use `--device cpu` for CPU-only runs. The recorded run used PyTorch 2.9.1 with ROCm 7.2.1 and scikit-learn 1.9.1. The command writes the fold metrics, out-of-fold probabilities, and a dataset-specific distance cache to `runs/geometry/`. [Recorded geometry benchmark results](docs/results/geometry.json)
 
 ## Tests
 
