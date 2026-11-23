@@ -10,10 +10,16 @@ jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
       - run: python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-      - run: python -m pip install .
-      - run: python -m unittest discover -s tests -v
+      - run: python -m pip install '.[geometry]'
+      - name: Test the installed package from outside the checkout
+        run: |
+          cd "$RUNNER_TEMP"
+          enzyme-graph --help
+          python -m unittest discover -s "$GITHUB_WORKSPACE/tests" -v

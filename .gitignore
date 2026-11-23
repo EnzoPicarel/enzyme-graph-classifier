@@ -1,12 +1,11 @@
-/AGENTS.md
-/HW4.docx
 /data/
 /runs/
-/coursework/
 *.zip
 *:Zone.Identifier
 *.pt
 __pycache__/
 *.egg-info/
 .venv/
-/submission/
+*.joblib
+/build/
+/dist/

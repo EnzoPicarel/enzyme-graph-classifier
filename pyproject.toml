@@ -6,8 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "enzyme-graph-classifier"
 version = "0.1.0"
 description = "Reproducible PyTorch benchmark for ENZYMES graph classification"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["torch>=2.2", "numpy>=1.26", "matplotlib>=3.8"]
+
+[project.urls]
+Repository = "https://github.com/EnzoPicarel/enzyme-graph-classifier"
 
 [project.scripts]
 enzyme-graph = "enzyme_graph.cli:main"
