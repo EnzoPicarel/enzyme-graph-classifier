@@ -1,44 +1,40 @@
-<h1 align="center">ENZYMES Graph Classifier</h1>
+<div align="center">
+  <h3>ENZYMES Graph Classifier</h3>
 
-<p align="center">A reproducible benchmark for six-class protein graph classification.</p>
+  <p>
+    Six-class protein graph classification with <strong>graph neural networks</strong>,
+    a <strong>graph-similarity ensemble</strong>, and reproducible evaluation.
+    <br />
+    <a href="#-getting-started"><strong>Quick Start »</strong></a>
+  </p>
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&amp;logoColor=white" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/PyTorch-graph%20learning-EE4C2C?logo=pytorch&amp;logoColor=white" alt="PyTorch">
-  <img src="https://img.shields.io/badge/scikit--learn-graph%20similarity-F7931E?logo=scikitlearn&amp;logoColor=white" alt="scikit-learn">
-</p>
+  <p>
+    <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=flat&amp;logo=python&amp;logoColor=white">
+    <img alt="PyTorch" src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&amp;logo=pytorch&amp;logoColor=white">
+    <img alt="scikit-learn" src="https://img.shields.io/badge/scikit--learn-F7931E?style=flat&amp;logo=scikitlearn&amp;logoColor=white">
+    <img alt="ROCm" src="https://img.shields.io/badge/ROCm-ED1C24?style=flat&amp;logo=amd&amp;logoColor=white">
+  </p>
+</div>
 
-<p align="center"><a href="#quick-start">Quick Start</a> · <a href="#results">Results</a> · <a href="#tests">Tests</a></p>
+## 🔍 About The Project
 
-Compare GCN, GIN, and residual message-passing networks with a graph-similarity ensemble. The project includes seeded splits, held-out and nested evaluation, and checkpoint-based CSV inference.
+This benchmark compares GCN, GIN, and residual message-passing networks with
+a graph-similarity ensemble on ENZYMES. Each protein graph has one of six
+labels. The workflow covers public dataset conversion, seeded splits,
+checkpoint-based inference, and per-class evaluation. [Original protein graph representation](https://doi.org/10.1093/bioinformatics/bti1007)
 
-## Quick Start
+## 🛠 Built With
 
-Create a CPU environment from the repository root.
+- **Python 3.10+ and PyTorch** for graph batching, message passing, and training.
+- **NumPy, SciPy, and scikit-learn** for graph descriptors, kernel classifiers, and calibration.
+- **Matplotlib** for confusion matrices and one-vs-rest ROC plots.
+- **AMD ROCm** for optional GPU execution under WSL.
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
-python -m pip install '.[geometry]'
-```
-
-Download the public ENZYMES archive and run the neural benchmark. The converter preserves all 600 labels and assigns graph-local node indices. [TUDataset ENZYMES](https://chrsmrrs.github.io/datasets/docs/datasets/#bioinformatics)
-
-```bash
-mkdir -p data/tu
-curl -fL https://www.chrsmrrs.com/graphkerneldatasets/ENZYMES.zip -o data/tu/ENZYMES.zip
-enzyme-graph prepare-tu --archive data/tu/ENZYMES.zip
-enzyme-graph --data data/tu inspect
-enzyme-graph --data data/tu --device cpu benchmark \
-  --split runs/tu-split.json --output runs/tu-baseline
-```
-
-## Architecture
+## 📐 Architecture
 
 ```mermaid
 flowchart LR
-    A[Validated graphs] --> B[Node features and adjacency]
+    A[Validated ENZYMES graphs] --> B[Node features and adjacency]
     B --> C[GCN, GIN, or residual MPNN]
     C --> D[Masked graph readout]
     B --> E[Graph descriptors and pairwise distances]
@@ -47,11 +43,80 @@ flowchart LR
     F --> G
 ```
 
-Node inputs combine 18 numeric attributes with three one-hot categories. The GNNs standardize attributes on training nodes and use a mask for variable-size graphs. The similarity models combine node matching, approximate transport, and neighborhood agreement. The ensemble averages a base classifier and a variant with density-scaled distances.
+### Technical Highlights
 
-## Results
+- **Node inputs.** Each node has 18 numeric attributes and one of three
+  categories. Numeric attributes are standardized on training nodes for the
+  GNNs. Masks keep padded nodes out of graph readouts.
+- **Neural baselines.** GCN uses degree-normalized convolution, GIN uses
+  sum aggregation, and the residual MPNNs pool feature means, standard
+  deviations, and maxima. [GCN paper](https://arxiv.org/abs/1609.02907), [GIN paper](https://arxiv.org/abs/1810.00826)
+- **Similarity ensemble.** Node matching, approximate transport, and
+  neighborhood agreement feed two classifiers. One uses density-scaled
+  distances. The ensemble averages their probabilities.
+- **Nested evaluation.** Calibration uses only the outer training fold.
+  Saved metrics distinguish fixed holdout results from pooled out-of-fold results.
 
-The public workflow evaluates all models below on the same 72 held-out graphs.
+### File Organization
+
+```text
+├── enzyme_graph/
+│   ├── cli.py, tu_data.py               # Commands and public dataset conversion
+│   ├── data.py, models.py, training.py  # Graph batching, GNNs, and inference
+│   ├── benchmark.py, comparison.py     # Neural baseline and MPNN experiments
+│   └── graph_geometry.py, geometry_*.py  # Similarity, evaluation, and inference
+├── docs/
+│   ├── benchmark.md                     # Protocols and reproduction commands
+│   └── results/                         # Recorded metrics and figures
+├── tests/                               # Dataset-free CPU checks
+└── pyproject.toml                       # Package and optional dependencies
+```
+
+## 🚀 Getting Started
+
+Use Python 3.10 or newer. The CPU setup works without a GPU.
+
+```sh
+git clone https://github.com/EnzoPicarel/enzyme-graph-classifier.git
+cd enzyme-graph-classifier
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m pip install '.[geometry]'
+```
+
+### Dataset
+
+Download the public ENZYMES archive. The converter preserves all 600 labels
+and rewrites edges with graph-local node indices. [TUDataset ENZYMES](https://chrsmrrs.github.io/datasets/docs/datasets/#bioinformatics)
+
+```sh
+mkdir -p data/tu
+curl -fL https://www.chrsmrrs.com/graphkerneldatasets/ENZYMES.zip -o data/tu/ENZYMES.zip
+enzyme-graph prepare-tu --archive data/tu/ENZYMES.zip
+enzyme-graph --data data/tu inspect
+```
+
+## ⚡ Execution
+
+```sh
+# Train the GCN and GIN baselines.
+enzyme-graph --data data/tu --device cpu benchmark \
+  --split runs/tu-split.json --output runs/tu-baseline
+
+# Evaluate the similarity ensemble on the same holdout and in nested folds.
+python -m enzyme_graph.geometry_benchmark --device cpu \
+  --data data/tu/train.csv --split runs/tu-split.json --output runs/tu-geometry
+```
+
+Use `--device cuda` with a GPU-enabled PyTorch build. Under WSL with ROCm,
+set `HSA_ENABLE_DXG_DETECTION=1` before launching. The benchmark guide covers
+residual MPNNs, the original CSV release, and saved-model inference. [Benchmark guide](docs/benchmark.md)
+
+## 📊 Results
+
+All models below use the same 72 held-out graphs from the public dataset.
+Neural scores show means ± sample standard deviations across three seeds.
 
 | Model | Training graphs | Held-out macro-F1 | Held-out accuracy |
 | --- | ---: | ---: | ---: |
@@ -60,36 +125,28 @@ The public workflow evaluates all models below on the same 72 held-out graphs.
 | GIN | 456 | 0.602 ± 0.054 | 0.602 ± 0.049 |
 | Similarity ensemble | 528 | **0.849** | **0.847** |
 
-The ensemble also reached **0.829 macro-F1** in two repeats of nested 16-fold cross-validation on the 600-graph public dataset. Each outer fold used 562 or 563 training graphs. The neural results are means ± sample standard deviations across three seeds. [Public neural runs](docs/results/tu-baseline.json), [public similarity runs](docs/results/tu-geometry.json)
+The ensemble also reached **0.829 macro-F1** across two repeats of nested
+16-fold cross-validation on all 600 graphs. Each outer fold used 562 or 563
+training graphs. [Neural run data](docs/results/tu-baseline.json), [similarity run data](docs/results/tu-geometry.json)
 
 <p align="center">
-  <a href="docs/results/tu-confusion.png"><img src="docs/results/tu-confusion.png" width="46%" alt="Similarity ensemble confusion matrix on 72 held-out TU ENZYMES graphs"></a>
+  <a href="docs/results/tu-confusion.png"><img src="docs/results/tu-confusion.png" width="46%" alt="Similarity ensemble confusion matrix on the 72 held-out graphs"></a>
   <a href="docs/results/tu-roc.png"><img src="docs/results/tu-roc.png" width="46%" alt="Similarity ensemble one-vs-rest ROC curves on the public holdout"></a>
 </p>
 
-The earlier 480-graph CSV benchmark uses a separate evaluation protocol. Its similarity ensemble scored **0.81218 macro-F1** across two repeats of nested 16-fold cross-validation and **0.73963** on the 60-graph holdout. Each outer cross-validation fit used 450 graphs. The holdout fit used 420. [480-graph measurements](docs/results/geometry.json)
+On the earlier 480-graph CSV release, the ensemble scored **0.81218 macro-F1**
+in nested cross-validation and **0.73963** on its 60-graph holdout. [480-graph results](docs/results/geometry.json)
 
-## Usage
+## 🧪 Tests
 
-Run the public geometry benchmark with the same split file as the neural benchmark.
-
-```bash
-python -m enzyme_graph.geometry_benchmark --device cpu \
-  --data data/tu/train.csv --split runs/tu-split.json --output runs/tu-geometry
-```
-
-Use `--device cuda` with a GPU-enabled PyTorch build. On ROCm under WSL, set `HSA_ENABLE_DXG_DETECTION=1` before launching. The [benchmark guide](docs/benchmark.md) covers the original CSV release, the residual comparison, and saved-model inference.
-
-## Tests
-
-```bash
+```sh
 python -m unittest discover -s tests -v
 ```
 
-The suite runs without a dataset download. It checks TU conversion, CPU training, checkpoint reload, prediction ordering, and graph invariance. GitHub Actions runs the same tests against the installed package.
+The suite runs without a dataset download. It checks TU conversion, CPU
+training, checkpoint reload, prediction order, and invariance to node order
+and padding. GitHub Actions runs the same suite against the installed package.
 
-## References
+## 👥 Author
 
-- Original protein graph representation. [Borgwardt et al., Protein Function Prediction via Graph Kernels](https://doi.org/10.1093/bioinformatics/bti1007)
-- Degree-normalized graph convolution. [Kipf and Welling, Semi-Supervised Classification with Graph Convolutional Networks](https://arxiv.org/abs/1609.02907)
-- GIN message passing. [Xu et al., How Powerful Are Graph Neural Networks?](https://arxiv.org/abs/1810.00826)
+- **Enzo Picarel**
