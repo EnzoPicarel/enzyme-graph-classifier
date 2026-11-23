@@ -1,0 +1,746 @@
+{
+  "winner": "mpnn3-sum",
+  "fold_seed": 93,
+  "fold_sizes": [
+    84,
+    84,
+    84,
+    84,
+    84
+  ],
+  "development_count": 420,
+  "test_count": 60,
+  "candidates": {
+    "mpnn3": {
+      "folds": [
+        {
+          "architecture": "mpnn3",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 62,
+          "epochs_run": 77,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 15.056519209999806,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7576902878139357
+        },
+        {
+          "architecture": "mpnn3",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 22,
+          "epochs_run": 37,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 6.661751134000042,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.6994015324450107
+        },
+        {
+          "architecture": "mpnn3",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 23,
+          "epochs_run": 38,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 7.380683274000148,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7202612813963389
+        },
+        {
+          "architecture": "mpnn3",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 17,
+          "epochs_run": 32,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 5.55974427800038,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.6396969696969697
+        },
+        {
+          "architecture": "mpnn3",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 14,
+          "epochs_run": 29,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 5.444765682000252,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7438802425825043
+        }
+      ],
+      "mean_validation_f1": 0.7121860627869518,
+      "refit_epochs": 22
+    },
+    "mpnn3-sum": {
+      "folds": [
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 21,
+          "epochs_run": 36,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 7.71238049700014,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7368528474711272
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 20,
+          "epochs_run": 35,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 7.654205434999767,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.6788107054236087
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 14,
+          "epochs_run": 29,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 5.4078232169999865,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.732842905016818
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 53,
+          "epochs_run": 68,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 11.780931756999962,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.6688193035704764
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 34,
+          "epochs_run": 49,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 8.701167112999883,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7925420333014923
+        }
+      ],
+      "mean_validation_f1": 0.7219735589567046,
+      "refit_epochs": 21
+    },
+    "mpnn1": {
+      "folds": [
+        {
+          "architecture": "mpnn1",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 33,
+          "epochs_run": 48,
+          "batch_size": 32,
+          "parameters": 143528,
+          "seconds": 4.966654164999909,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7362319247376719
+        },
+        {
+          "architecture": "mpnn1",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 28,
+          "epochs_run": 43,
+          "batch_size": 32,
+          "parameters": 143528,
+          "seconds": 4.657560012000431,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7242802961193765
+        },
+        {
+          "architecture": "mpnn1",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 37,
+          "epochs_run": 52,
+          "batch_size": 32,
+          "parameters": 143528,
+          "seconds": 5.4605708339995545,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7225959623809085
+        },
+        {
+          "architecture": "mpnn1",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 19,
+          "epochs_run": 34,
+          "batch_size": 32,
+          "parameters": 143528,
+          "seconds": 3.548664822000319,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.5556806203468166
+        },
+        {
+          "architecture": "mpnn1",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 41,
+          "epochs_run": 56,
+          "batch_size": 32,
+          "parameters": 143528,
+          "seconds": 5.667868042000009,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "validation_f1": 0.7599976647078096
+        }
+      ],
+      "mean_validation_f1": 0.6997572936585166,
+      "refit_epochs": 33
+    }
+  },
+  "comparisons": {
+    "gin": {
+      "runs": [
+        {
+          "architecture": "gin",
+          "lr": 0.003,
+          "seed": 42,
+          "best_epoch": 36,
+          "epochs_run": 36,
+          "batch_size": 32,
+          "parameters": 14280,
+          "seconds": 3.5332574389999536,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.475725763769242,
+            "accuracy": 0.5,
+            "class_f1": [
+              0.25,
+              0.3076923076923077,
+              0.5454545454545454,
+              0.6956521739130435,
+              0.5555555555555556,
+              0.5
+            ],
+            "confusion": [
+              [
+                2,
+                0,
+                3,
+                1,
+                1,
+                3
+              ],
+              [
+                1,
+                2,
+                1,
+                4,
+                0,
+                2
+              ],
+              [
+                1,
+                0,
+                6,
+                0,
+                0,
+                3
+              ],
+              [
+                1,
+                0,
+                0,
+                8,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                2,
+                0,
+                5,
+                2
+              ],
+              [
+                0,
+                1,
+                0,
+                0,
+                2,
+                7
+              ]
+            ]
+          },
+          "checkpoint": "gin-refit-s42.pt"
+        },
+        {
+          "architecture": "gin",
+          "lr": 0.003,
+          "seed": 43,
+          "best_epoch": 36,
+          "epochs_run": 36,
+          "batch_size": 32,
+          "parameters": 14280,
+          "seconds": 3.2747596829999566,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.496783955937274,
+            "accuracy": 0.5,
+            "class_f1": [
+              0.34782608695652173,
+              0.42857142857142855,
+              0.6363636363636364,
+              0.6363636363636364,
+              0.631578947368421,
+              0.3
+            ],
+            "confusion": [
+              [
+                4,
+                0,
+                2,
+                1,
+                1,
+                2
+              ],
+              [
+                1,
+                3,
+                1,
+                3,
+                0,
+                2
+              ],
+              [
+                2,
+                0,
+                7,
+                0,
+                0,
+                1
+              ],
+              [
+                2,
+                0,
+                0,
+                7,
+                0,
+                1
+              ],
+              [
+                2,
+                0,
+                1,
+                0,
+                6,
+                1
+              ],
+              [
+                2,
+                1,
+                1,
+                1,
+                2,
+                3
+              ]
+            ]
+          },
+          "checkpoint": "gin-refit-s43.pt"
+        },
+        {
+          "architecture": "gin",
+          "lr": 0.003,
+          "seed": 44,
+          "best_epoch": 36,
+          "epochs_run": 36,
+          "batch_size": 32,
+          "parameters": 14280,
+          "seconds": 3.320817505999912,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.529939704926805,
+            "accuracy": 0.5166666666666667,
+            "class_f1": [
+              0.3333333333333333,
+              0.35294117647058826,
+              0.5185185185185185,
+              0.8235294117647058,
+              0.625,
+              0.5263157894736842
+            ],
+            "confusion": [
+              [
+                4,
+                1,
+                4,
+                0,
+                0,
+                1
+              ],
+              [
+                2,
+                3,
+                4,
+                0,
+                0,
+                1
+              ],
+              [
+                2,
+                0,
+                7,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                1,
+                1,
+                7,
+                0,
+                0
+              ],
+              [
+                4,
+                0,
+                0,
+                0,
+                5,
+                1
+              ],
+              [
+                1,
+                2,
+                1,
+                0,
+                1,
+                5
+              ]
+            ]
+          },
+          "checkpoint": "gin-refit-s44.pt"
+        }
+      ],
+      "mean_test_macro_f1": 0.5008164748777737,
+      "std_test_macro_f1": 0.027331003653598984,
+      "mean_test_accuracy": 0.5055555555555555,
+      "std_test_accuracy": 0.009622504486493792
+    },
+    "mpnn3-sum": {
+      "runs": [
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 42,
+          "best_epoch": 21,
+          "epochs_run": 21,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 4.143016632000126,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.6987050960735172,
+            "accuracy": 0.7,
+            "class_f1": [
+              0.631578947368421,
+              0.7,
+              0.8571428571428571,
+              0.6,
+              0.7368421052631579,
+              0.6666666666666666
+            ],
+            "confusion": [
+              [
+                6,
+                0,
+                2,
+                1,
+                0,
+                1
+              ],
+              [
+                0,
+                7,
+                0,
+                2,
+                0,
+                1
+              ],
+              [
+                0,
+                0,
+                9,
+                0,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                6,
+                2,
+                1
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                7,
+                0
+              ],
+              [
+                1,
+                2,
+                0,
+                0,
+                0,
+                7
+              ]
+            ]
+          },
+          "checkpoint": "mpnn3-sum-refit-s42.pt"
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 43,
+          "best_epoch": 21,
+          "epochs_run": 21,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 3.919155938000131,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.6372782446311859,
+            "accuracy": 0.6333333333333333,
+            "class_f1": [
+              0.4,
+              0.7058823529411765,
+              0.7619047619047619,
+              0.5833333333333334,
+              0.7058823529411765,
+              0.6666666666666666
+            ],
+            "confusion": [
+              [
+                4,
+                0,
+                2,
+                2,
+                0,
+                2
+              ],
+              [
+                0,
+                6,
+                1,
+                2,
+                0,
+                1
+              ],
+              [
+                1,
+                0,
+                8,
+                0,
+                0,
+                1
+              ],
+              [
+                2,
+                0,
+                0,
+                7,
+                1,
+                0
+              ],
+              [
+                2,
+                0,
+                0,
+                2,
+                6,
+                0
+              ],
+              [
+                1,
+                1,
+                0,
+                1,
+                0,
+                7
+              ]
+            ]
+          },
+          "checkpoint": "mpnn3-sum-refit-s43.pt"
+        },
+        {
+          "architecture": "mpnn3-sum",
+          "lr": 0.001,
+          "seed": 44,
+          "best_epoch": 21,
+          "epochs_run": 21,
+          "batch_size": 32,
+          "parameters": 311336,
+          "seconds": 4.106992423000065,
+          "device": "cuda",
+          "hardware": "AMD Radeon(TM) 8060S Graphics",
+          "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+          "threads": 2,
+          "test": {
+            "macro_f1": 0.5948355187485621,
+            "accuracy": 0.6,
+            "class_f1": [
+              0.3333333333333333,
+              0.7,
+              0.6086956521739131,
+              0.5714285714285714,
+              0.8,
+              0.5555555555555556
+            ],
+            "confusion": [
+              [
+                3,
+                0,
+                3,
+                2,
+                0,
+                2
+              ],
+              [
+                1,
+                7,
+                0,
+                2,
+                0,
+                0
+              ],
+              [
+                2,
+                1,
+                7,
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                2,
+                6,
+                1,
+                1
+              ],
+              [
+                1,
+                0,
+                0,
+                1,
+                8,
+                0
+              ],
+              [
+                1,
+                2,
+                1,
+                0,
+                1,
+                5
+              ]
+            ]
+          },
+          "checkpoint": "mpnn3-sum-refit-s44.pt"
+        }
+      ],
+      "mean_test_macro_f1": 0.6436062864844218,
+      "std_test_macro_f1": 0.05222313049491032,
+      "mean_test_accuracy": 0.6444444444444444,
+      "std_test_accuracy": 0.05091750772173154
+    }
+  },
+  "winner_roc_auc": {
+    "1": 0.832,
+    "2": 0.93,
+    "3": 0.952,
+    "4": 0.906,
+    "5": 0.936,
+    "6": 0.894
+  }
+}
