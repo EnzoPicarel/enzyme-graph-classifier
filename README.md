@@ -85,3 +85,9 @@ The balanced training split ties the majority-class rule, which picks class 1. G
 ## Tests
 
 `python -m unittest discover -s tests -v` runs the dataset-free CPU suite. The synthetic test covers CSV parsing, split integrity, training, checkpoint reload, held-out scoring, and prediction order. GitHub Actions runs the same suite on CPU.
+
+## References
+
+- ENZYMES graph representation and classification task. [Borgwardt et al., Protein Function Prediction via Graph Kernels](https://doi.org/10.1093/bioinformatics/bti1007)
+- Degree-normalized graph convolution. [Kipf and Welling, Semi-Supervised Classification with Graph Convolutional Networks](https://arxiv.org/abs/1609.02907)
+- GIN message passing. [Xu et al., How Powerful Are Graph Neural Networks?](https://arxiv.org/abs/1810.00826)
