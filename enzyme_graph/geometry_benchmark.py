@@ -79,7 +79,19 @@ def _local_probabilities(table, distance, y, training, query, *, bandwidth, alph
     return np.stack(out)
 
 
-def _build_design(y, query, ref, distances, table):
+def _kernel_probabilities(train, query, labels, regularization, estimators, index):
+    if estimators is not None and index < len(estimators):
+        estimator = estimators[index]
+    else:
+        estimator = SVC(
+            C=regularization, kernel="precomputed", probability=True, random_state=42
+        ).fit(train, labels)
+        if estimators is not None:
+            estimators.append(estimator)
+    return estimator.predict_proba(query)
+
+
+def _build_design(y, query, ref, distances, table, *, estimators=None):
     raw = []
     train = []
     valid = []
@@ -94,11 +106,10 @@ def _build_design(y, query, ref, distances, table):
     median_train = np.median(train, axis=0)
     median_valid = np.median(valid, axis=0)
     candidate = []
-    for gamma in (0.6, 1.8, 3.6):
+    for index, gamma in enumerate((0.6, 1.8, 3.6)):
         kt = np.mean(np.exp(-gamma * np.stack(train)), axis=0)
         kv = np.mean(np.exp(-gamma * np.stack(valid)), axis=0)
-        model = SVC(C=4, kernel="precomputed", probability=True, random_state=42)
-        candidate.append(model.fit(kt, y[ref]).predict_proba(kv))
+        candidate.append(_kernel_probabilities(kt, kv, y[ref], 4, estimators, index))
     normalize = StandardScaler().fit(table[ref])
     z = normalize.transform(table).clip(-5, 5)
     dtrain = euclidean_distances(z[ref], squared=True)
@@ -106,11 +117,10 @@ def _build_design(y, query, ref, distances, table):
     r = max(np.median(dtrain), 1e-6)
     a = np.exp(-2 * dtrain / r)
     b = np.exp(-2 * dtest / r)
-    for weight in (0.25, 0.65):
-        clf = SVC(C=4, kernel="precomputed", probability=True, random_state=42)
+    for index, weight in enumerate((0.25, 0.65), 3):
         fit = weight * a + (1 - weight) * np.exp(-2 * median_train)
         test = weight * b + (1 - weight) * np.exp(-2 * median_valid)
-        candidate.append(clf.fit(fit, y[ref]).predict_proba(test))
+        candidate.append(_kernel_probabilities(fit, test, y[ref], 4, estimators, index))
     # The nested reference labels can be used to fit a graph-local model.
     full = np.zeros((len(y), len(y)))
     full[np.ix_(query, ref)] = median_valid
@@ -126,7 +136,7 @@ def _build_design(y, query, ref, distances, table):
     return np.concatenate(raw, axis=2)
 
 
-def _adaptive_design(y, query, reference, distances, table, *, base):
+def _adaptive_design(y, query, reference, distances, *, base, estimators=None):
     train = np.stack([d[np.ix_(reference, reference)] for d in distances])
     test = np.stack([d[np.ix_(query, reference)] for d in distances])
     median = np.maximum(np.median(train, axis=(1, 2)), 1e-5)
@@ -135,7 +145,7 @@ def _adaptive_design(y, query, reference, distances, table, *, base):
     neighbors = train.copy()
     np.fill_diagonal(neighbors, np.inf)
     features = []
-    for k in (5, 15):
+    for index, k in enumerate((5, 15)):
         train_radius = np.maximum(
             np.partition(neighbors, k - 1, axis=1)[:, k - 1], 1e-3
         )
@@ -143,10 +153,11 @@ def _adaptive_design(y, query, reference, distances, table, *, base):
         local_train = train / np.sqrt(train_radius[:, None] * train_radius[None, :])
         local_test = test / np.sqrt(test_radius[:, None] * train_radius[None, :])
         features.append(distance_features(local_test, y[reference]))
-        model = SVC(C=5, kernel="precomputed", probability=True, random_state=42)
         kernel = np.exp(-local_train) * 0.55 + np.exp(-2 * train) * 0.45
         query_kernel = np.exp(-local_test) * 0.55 + np.exp(-2 * test) * 0.45
-        p = model.fit(kernel, y[reference]).predict_proba(query_kernel)
+        p = _kernel_probabilities(
+            kernel, query_kernel, y[reference], 5, estimators, index
+        )
         features.append(np.log(p.clip(1e-3, 1))[:, :, None])
     labels = y[reference]
     same = labels[:, None] == labels[None, :]
@@ -174,44 +185,52 @@ def _initialize_worker(
     _GEOMETRY = labels, descriptors, distances
 
 
+def fit_calibrators(labels, descriptors, distances, train, *, seed):
+    inner = StratifiedKFold(n_splits=INNER_FOLDS, shuffle=True, random_state=seed)
+    training_features = [[], []]
+    training_classes = []
+    for reference_idx, calibration_idx in inner.split(
+        descriptors[train], labels[train]
+    ):
+        reference, calibration = train[reference_idx], train[calibration_idx]
+        training_classes.append(labels[calibration])
+        basic = _build_design(labels, calibration, reference, distances, descriptors)
+        extended = _adaptive_design(
+            labels, calibration, reference, distances, base=basic
+        )
+        training_features[0].append(basic)
+        training_features[1].append(extended)
+    target = (np.concatenate(training_classes)[:, None] == np.arange(6)).ravel()
+    calibrators = []
+    for pieces in training_features:
+        training = np.concatenate(pieces)
+        estimator = make_pipeline(
+            StandardScaler(), LogisticRegression(C=META_REGULARIZATION, max_iter=1_500)
+        )
+        calibrators.append(
+            estimator.fit(training.reshape(-1, training.shape[-1]), target)
+        )
+    return calibrators
+
+
+def calibrated_probabilities(estimator, features):
+    logits = estimator.decision_function(features.reshape(-1, features.shape[-1]))
+    return softmax(logits.reshape(-1, 6), axis=1)
+
+
 def _score_partition(partition: tuple[int, int, np.ndarray, np.ndarray]) -> tuple:
     repeat, number, train, query = partition
     labels, descriptors, distances = _GEOMETRY
-    inner = StratifiedKFold(
-        n_splits=INNER_FOLDS, shuffle=True, random_state=INNER_SEED + number
-    )
-    scores = []
     with threadpool_limits(limits=1):
-        training_features = [[], []]
-        training_classes = []
-        for reference_idx, calibration_idx in inner.split(
-            descriptors[train], labels[train]
-        ):
-            reference, calibration = train[reference_idx], train[calibration_idx]
-            training_classes.append(labels[calibration])
-            basic = _build_design(
-                labels, calibration, reference, distances, descriptors
-            )
-            extended = _adaptive_design(
-                labels, calibration, reference, distances, descriptors, base=basic
-            )
-            training_features[0].append(basic)
-            training_features[1].append(extended)
-        target = (np.concatenate(training_classes)[:, None] == np.arange(6)).ravel()
-        basic = _build_design(labels, query, train, distances, descriptors)
-        extended = _adaptive_design(
-            labels, query, train, distances, descriptors, base=basic
+        calibrators = fit_calibrators(
+            labels, descriptors, distances, train, seed=INNER_SEED + number
         )
-        for pieces, query_features in zip(training_features, (basic, extended)):
-            training = np.concatenate(pieces)
-            columns = training.shape[-1]
-            estimator = make_pipeline(
-                StandardScaler(),
-                LogisticRegression(C=META_REGULARIZATION, max_iter=1_500),
-            )
-            estimator.fit(training.reshape(-1, columns), target)
-            logits = estimator.decision_function(query_features.reshape(-1, columns))
-            scores.append(softmax(logits.reshape(-1, 6), axis=1))
+        basic = _build_design(labels, query, train, distances, descriptors)
+        extended = _adaptive_design(labels, query, train, distances, base=basic)
+        scores = [
+            calibrated_probabilities(estimator, features)
+            for estimator, features in zip(calibrators, (basic, extended))
+        ]
     return repeat, number, query, scores[0], scores[1]
 
 
